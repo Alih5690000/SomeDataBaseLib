@@ -52,25 +52,25 @@ class DataBase{
         std::vector<uint8_t> arr;
         arr.resize(4);
         memcpy(arr.data(), &num, sizeof(uint32_t));
-        attrs[key]=arr;
+        attrs[key]=std::move(arr);
     }
     void AddStr(const std::string& key, const std::string& str){
         std::vector<uint8_t> arr;
         arr.resize(str.size());
         memcpy(arr.data(), str.data(), str.size());
-        attrs[key]=arr;
+        attrs[key]=std::move(arr);
     }
     template <typename T>
     void AddVector(const std::string& key, const std::vector<T>& vec){
         std::vector<uint8_t> arr;
         arr.resize(vec.size()*sizeof(T));
         memcpy(arr.data(), vec.data(), vec.size()*sizeof(T));
-        attrs[key]=arr;
+        attrs[key]=std::move(arr);
     }
     template <typename T>
     std::vector<T> ReadVector(const std::string& key){
-        std::vector<T> l(db.attrs[key].size()/sizeof(T));
-        memcpy(l.data(), db.attrs[key].data(), db.attrs[key].size());
+        std::vector<T> l(attrs[key].size()/sizeof(T));
+        memcpy(l.data(), attrs[key].data(), attrs[key].size());
     }
     template <typename K, typename V>
     void AddMap(const std::string& key, std::map<K,V> map){
@@ -83,10 +83,22 @@ class DataBase{
             memcpy(arr.data()+offset, &v, sizeof(V));
             offset+=sizeof(V);
         }
-        attrs[key]=arr;
+        attrs[key]=std::move(arr);
     }
     template <typename K, typename V>
     std::map<K,V> ReadMap(const std::string& key){
-        #warning "this shit is unfinshed
+        const std::vector<uint8_t>& arr=attrs[key];
+        std::map<K,V> res;
+        int i=0;
+        while(i<arr.size()){
+            K k;
+            memcpy(&k, arr.data()+i, sizeof(K));
+            i+=sizeof(K);
+            V v;
+            memcpy(&v, arr.data()+i, sizeof(V));
+            i+=sizeof(V);
+            res[k]=v;
+        }
+        return res;
     }
 };
