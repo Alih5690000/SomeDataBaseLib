@@ -74,11 +74,19 @@ class DataBase{
     }
     template <typename K, typename V>
     void AddMap(const std::string& key, std::map<K,V> map){
-        #error this shit is unfinished
         std::vector<uint8_t> arr;
-        arr.resize(vec.size()*(sizeof(K)+sizeof(V))+sizeof(uint32_t)*2);
-        uint32_t kSize=sizeof(K), vSize=sizeof(V);
-        memcpy(arr.data(), &kSize, sizeof(uint32_t));
-        memcpy(arr.data()+sizeof(uint32_t), &VSize, sizeof(uint32_t));
+        arr.resize(map.size()*(sizeof(K)+sizeof(V)));
+        size_t offset=0;
+        for (const auto& [k,v]:map){
+            memcpy(arr.data()+offset, &k, sizeof(K));
+            offset+=sizeof(K);
+            memcpy(arr.data()+offset, &v, sizeof(V));
+            offset+=sizeof(V);
+        }
+        attrs[key]=arr;
+    }
+    template <typename K, typename V>
+    std::map<K,V> ReadMap(const std::string& key){
+        #warning "this shit is unfinshed
     }
 };
