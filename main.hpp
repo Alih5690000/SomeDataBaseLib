@@ -67,4 +67,18 @@ class DataBase{
         memcpy(arr.data(), vec.data(), vec.size()*sizeof(T));
         attrs[key]=arr;
     }
+    template <typename T>
+    std::vector<T> ReadVector(const std::string& key){
+        std::vector<T> l(db.attrs[key].size()/sizeof(T));
+        memcpy(l.data(), db.attrs[key].data(), db.attrs[key].size());
+    }
+    template <typename K, typename V>
+    void AddMap(const std::string& key, std::map<K,V> map){
+        #error this shit is unfinished
+        std::vector<uint8_t> arr;
+        arr.resize(vec.size()*(sizeof(K)+sizeof(V))+sizeof(uint32_t)*2);
+        uint32_t kSize=sizeof(K), vSize=sizeof(V);
+        memcpy(arr.data(), &kSize, sizeof(uint32_t));
+        memcpy(arr.data()+sizeof(uint32_t), &VSize, sizeof(uint32_t));
+    }
 };
