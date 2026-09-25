@@ -48,4 +48,23 @@ class DataBase{
             file.write(data,size2);
         }
     }
+    void AddInt(const std::string& key, uint32_t num){
+        std::vector<uint8_t> arr;
+        arr.resize(4);
+        memcpy(arr.data(), &num, sizeof(uint32_t));
+        attrs[key]=arr;
+    }
+    void AddStr(const std::string& key, const std::string& str){
+        std::vector<uint8_t> arr;
+        arr.resize(str.size());
+        memcpy(arr.data(), str.data(), str.size());
+        attrs[key]=arr;
+    }
+    template <typename T>
+    void AddVector(const std::string& key, const std::vector<T>& vec){
+        std::vector<uint8_t> arr;
+        arr.resize(vec.size()*sizeof(T));
+        memcpy(arr.data(), vec.data(), vec.size()*sizeof(T));
+        attrs[key]=arr;
+    }
 };
