@@ -123,15 +123,29 @@ class DataBase{
         int i=0;
         while (offset<arr.size()){
             uint32_t s=vec[i].data.size();
+            arr.resize(arr.size()+sizeof(uint32_t));
             memcpy(arr.data()+offset, &s, sizeof(uint32_t));
             offset+=sizeof(uint32_t);
+            arr.resize(arr.size()+s);
             memcpy(arr.data()+offset, vec[i].data.data(), vec[i].data.size());
             offset+=s;
+            i++;
         }
         attrs[key]=std::move(arr);
     }
     std::vector<Ellement> ReadVectorEx(const std::string& key){
         std::vector<Ellement> res;
+        size_t offset;
+        int i=0;
+        while (offset<attrs[key].size()){
+            uint32_t size;
+            memcpy(attrs[key].data()+offset, &size, sizeof(uint32_t));
+            offset+=sizeof(size);
+            memcpy(res[i].data.data(), attrs[key].data()+offset, size);
+            offset+=size;
+            i++;
+        }
+        return std::move(res);
     }
     /**
      * @brief Adds map to DataBase::atrs eventually turning it into vector of uint8_t
