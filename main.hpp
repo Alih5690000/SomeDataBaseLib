@@ -9,6 +9,11 @@
 #define LOG
 #endif
 
+struct Ellement{
+    std::string name;
+    std::vector<uint8_t> data;
+};
+
 /**
  * @brief Just a database. Look at methods brief if you want to know more.
  */
@@ -111,6 +116,22 @@ class DataBase{
     std::vector<T> ReadVector(const std::string& key){
         std::vector<T> l(attrs[key].size()/sizeof(T));
         memcpy(l.data(), attrs[key].data(), attrs[key].size());
+    }
+    void AddVectorEx(const std::string& key, std::vector<Ellement> vec){
+        std::vector<uint8_t> arr;
+        size_t offset;
+        int i=0;
+        while (offset<arr.size()){
+            uint32_t s=vec[i].data.size();
+            memcpy(arr.data()+offset, &s, sizeof(uint32_t));
+            offset+=sizeof(uint32_t);
+            memcpy(arr.data()+offset, vec[i].data.data(), vec[i].data.size());
+            offset+=s;
+        }
+        attrs[key]=std::move(arr);
+    }
+    std::vector<Ellement> ReadVectorEx(const std::string& key){
+        std::vector<Ellement> res;
     }
     /**
      * @brief Adds map to DataBase::atrs eventually turning it into vector of uint8_t
