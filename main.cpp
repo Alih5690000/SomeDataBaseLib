@@ -3,14 +3,15 @@
 #include "main.hpp"
 
 int main(){
-    /*DataBase db;
-    std::map<int,int> m;
-    m[3]=4;
-    db.AddMap("m",m);
+    DataBase db;
+    std::vector<Ellement> e={
+        Ellement(5),
+        Ellement(7)
+    };
+    db.AddVectorEx("v",e);
     db.WriteTo("lol.db");
-    return 0;*/
-    DataBase db("lol.db");
-    auto m=db.ReadMap<int,int>("m");
-    std::cout<<"3 is "<<m[3]<<std::endl;
+    db=DataBase("lol.db");
+    auto a=db.ReadVectorEx("v");
+    std::cout<<"Vec's first is "<<a[0].GetInt()<<std::endl;
     return 0;
 }

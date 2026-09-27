@@ -12,6 +12,62 @@
 struct Ellement{
     std::string name;
     std::vector<uint8_t> data;
+    void WriteInt(uint32_t num){
+        data.resize(sizeof(uint32_t));
+        memcpy(data.data(), &num, sizeof(uint32_t));
+    }
+    uint32_t GetInt(){
+        uint32_t num;
+        memcpy(&num, data.data(), sizeof(uint32_t));
+        return num;
+    }
+    void WriteStr(std::string str){
+        data.resize(str.size());
+        memcpy(data.data(), str.data(), str.size());
+    }
+    std::string GetStr(){
+        std::string str;
+        str.resize(data.size());
+        memcpy(str.data(), data.data(), data.size());
+        return str;
+    }
+    void WriteVec(std::vector<Ellement> v){
+        size_t size=0;
+        for (auto i:v){
+            size+=i.data.size()+sizeof(uint32_t);
+        }
+        data.resize(size);
+        size_t offset=0;
+        int i=0;
+        while (offset<size){
+            uint32_t size=v[i].data.size();
+            memcpy(data.data()+offset, &size, sizeof(uint32_t));
+            offset+=sizeof(uint32_t);
+            memcpy(data.data()+offset, v[i].data.data(), 
+                v[i].data.size());
+            offset+=v[i].data.size();
+            i++;
+        }
+    }
+    std::vector<Ellement> GetVec(){
+        std::vector<Ellement> res;
+        size_t offset=0;
+        while (offset<data.size()){
+            Ellement e;
+            uint32_t size=0;
+            memcpy(&size, data.data()+offset, sizeof(uint32_t));
+            offset+=sizeof(uint32_t);
+            e.data.resize(size);
+            memcpy(e.data.data(), data.data()+offset, size);
+            offset+=size;
+            res.push_back(e);
+        }
+        return res;
+    }
+    Ellement(uint32_t num){
+        WriteInt(num);
+    }
+    Ellement()=default;
 };
 
 /**
@@ -116,36 +172,17 @@ class DataBase{
     std::vector<T> ReadVector(const std::string& key){
         std::vector<T> l(attrs[key].size()/sizeof(T));
         memcpy(l.data(), attrs[key].data(), attrs[key].size());
+        return l;
     }
     void AddVectorEx(const std::string& key, std::vector<Ellement> vec){
-        std::vector<uint8_t> arr;
-        size_t offset;
-        int i=0;
-        while (offset<arr.size()){
-            uint32_t s=vec[i].data.size();
-            arr.resize(arr.size()+sizeof(uint32_t));
-            memcpy(arr.data()+offset, &s, sizeof(uint32_t));
-            offset+=sizeof(uint32_t);
-            arr.resize(arr.size()+s);
-            memcpy(arr.data()+offset, vec[i].data.data(), vec[i].data.size());
-            offset+=s;
-            i++;
-        }
-        attrs[key]=std::move(arr);
+        Ellement ell;
+        ell.WriteVec(vec);
+        attrs[key]=ell.data;
     }
     std::vector<Ellement> ReadVectorEx(const std::string& key){
-        std::vector<Ellement> res;
-        size_t offset;
-        int i=0;
-        while (offset<attrs[key].size()){
-            uint32_t size;
-            memcpy(attrs[key].data()+offset, &size, sizeof(uint32_t));
-            offset+=sizeof(size);
-            memcpy(res[i].data.data(), attrs[key].data()+offset, size);
-            offset+=size;
-            i++;
-        }
-        return std::move(res);
+        Ellement e;
+        e.data=attrs[key];
+        return e.GetVec();
     }
     /**
      * @brief Adds map to DataBase::atrs eventually turning it into vector of uint8_t
