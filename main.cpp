@@ -5,13 +5,13 @@
 int main(){
     DataBase db;
     std::vector<Ellement> e={
-        Ellement(5),
-        Ellement(7)
+        Ellement("a",5),
+        Ellement("b",7)
     };
-    db.AddVectorEx("v",e);
+    db.AddMapEx("m",e);
     db.WriteTo("lol.db");
     db=DataBase("lol.db");
-    auto a=db.ReadVectorEx("v");
-    std::cout<<"Vec's first is "<<a[0].GetInt()<<std::endl;
+    auto a=db.ReadMapEx("m");
+    std::cout<<"Map's a is "<<GetByName(a,"a").GetInt()<<std::endl;
     return 0;
 }

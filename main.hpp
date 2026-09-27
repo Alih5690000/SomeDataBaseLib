@@ -64,8 +64,64 @@ struct Ellement{
         }
         return res;
     }
+    void WriteMap(const std::vector<Ellement>& m){
+        size_t size=0;
+        for (auto i:m){
+            size+=i.name.size();
+            size+=i.data.size();
+            size+=sizeof(uint32_t)*2;
+        }
+        data.resize(size);
+        size_t offset=0;
+        int i=0;
+        while (offset<size){
+            uint32_t nameSize=m[i].name.size();
+            memcpy(data.data()+offset, &nameSize, sizeof(uint32_t));
+            offset+=sizeof(uint32_t);
+            memcpy(data.data()+offset, m[i].name.data(), nameSize);
+            offset+=nameSize;
+            uint32_t dataSize=m[i].data.size();
+            memcpy(data.data()+offset, &dataSize, sizeof(uint32_t));
+            offset+=sizeof(uint32_t);
+            memcpy(data.data()+offset, m[i].data.data(), dataSize);
+            offset+=dataSize;
+            i++;
+        }
+    }
+    std::vector<Ellement> GetMap(){
+        std::vector<Ellement> res;
+        size_t offset=0;
+        while (offset<data.size()){
+            Ellement e;
+            uint32_t nameSize;
+            memcpy(&nameSize, data.data()+offset, sizeof(uint32_t));
+            offset+=sizeof(uint32_t);
+            e.name.resize(nameSize);
+            memcpy(e.name.data(), data.data()+offset, nameSize);
+            offset+=nameSize;
+            uint32_t dataSize;
+            memcpy(&dataSize, data.data()+offset, sizeof(uint32_t));
+            offset+=sizeof(uint32_t);
+            e.data.resize(dataSize);
+            memcpy(e.data.data(), data.data()+offset, dataSize);
+            offset+=dataSize;
+            res.push_back(e);
+        }
+        return res;
+    }
     Ellement(uint32_t num){
         WriteInt(num);
+    }
+    Ellement(std::string k,uint32_t num){
+        WriteInt(num);
+        name=k;
+    }
+    Ellement(std::string num){
+        WriteStr(num);
+    }
+    Ellement(std::string k,std::string num){
+        WriteStr(num);
+        name=k;
     }
     Ellement()=default;
 };
@@ -113,7 +169,7 @@ class DataBase{
      * @param path Path to database.
      */
     void WriteTo(const std::string& path){
-        std::ofstream file(path,std::ios::binary | std::ios::in);
+        std::ofstream file(path,std::ios::binary | std::ios::trunc);
         for (auto [k,v]:attrs){
             uint32_t size=k.size();
             LOG("[WRITE]Length of name is "+std::to_string(size));
@@ -184,6 +240,16 @@ class DataBase{
         e.data=attrs[key];
         return e.GetVec();
     }
+    void AddMapEx(const std::string& key, std::vector<Ellement> vec){
+        Ellement ell;
+        ell.WriteMap(vec);
+        attrs[key]=ell.data;
+    }
+    std::vector<Ellement> ReadMapEx(const std::string& key){
+        Ellement e;
+        e.data=attrs[key];
+        return e.GetMap();
+    }
     /**
      * @brief Adds map to DataBase::atrs eventually turning it into vector of uint8_t
      * @param key Key.
@@ -227,3 +293,10 @@ class DataBase{
         return res;
     }
 };
+
+Ellement GetByName(std::vector<Ellement> v, std::string n){
+    for (auto i:v){
+        if (i.name==n) return i;
+    }
+    throw std::runtime_error("[GetByName]:Couldnt find key "+n);
+}
