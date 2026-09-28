@@ -12,7 +12,7 @@ int main(){
     db.AddMapEx("m",e);
     db.WriteTo("lol.db");
     db=DataBase("lol.db");
-    auto a=db.ReadMapEx("m");
-    std::cout<<"Map's inner_a is "<<GetByName(GetByName(a, "m").GetMap(), "inner_a").GetInt()<<std::endl;
+    Map a=db.ReadMapEx("m");
+    std::cout<<"Map's inner_a is "<<a.Get("m").GetMap().Get("inner_a").GetStr()<<std::endl;
     return 0;
 }
