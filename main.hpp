@@ -109,6 +109,12 @@ struct Ellement{
         }
         return res;
     }
+    Ellement GetByName(std::string n){
+        for (auto i:GetMap()){
+            if (i.name==n) return i;
+        }
+        throw std::runtime_error("[GetByName]:Couldnt find key "+n);
+    }
     Ellement(uint32_t num){
         WriteInt(num);
     }
@@ -121,6 +127,20 @@ struct Ellement{
     }
     Ellement(std::string k,std::string num){
         WriteStr(num);
+        name=k;
+    }
+    Ellement(std::vector<Ellement> num){
+        WriteVec(num);
+    }
+    Ellement(std::string k,std::vector<Ellement> num){
+        WriteVec(num);
+        name=k;
+    }
+    Ellement(std::vector<Ellement> v, bool){
+        WriteMap(v);
+    }
+    Ellement(std::string k,std::vector<Ellement> v, bool){
+        WriteMap(v);
         name=k;
     }
     Ellement()=default;
@@ -295,8 +315,8 @@ class DataBase{
 };
 
 Ellement GetByName(std::vector<Ellement> v, std::string n){
-    for (auto i:v){
-        if (i.name==n) return i;
+        for (auto i:v){
+            if (i.name==n) return i;
+        }
+        throw std::runtime_error("[GetByName]:Couldnt find key "+n);
     }
-    throw std::runtime_error("[GetByName]:Couldnt find key "+n);
-}
