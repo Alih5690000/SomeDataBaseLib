@@ -13,6 +13,6 @@ int main(){
     db.WriteTo("lol.db");
     db=DataBase("lol.db");
     Map a=db.ReadMapEx("m");
-    std::cout<<"Map's inner_a is "<<a.Get("m").GetMap().Get("inner_a").GetStr()<<std::endl;
+    std::cout<<"Map's inner_a is "<<a.Get("m").GetMap().Get("inner_a").GetInt()<<std::endl;
     return 0;
 }

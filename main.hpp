@@ -9,6 +9,25 @@
 #define LOG
 #endif
 
+template <typename Ellement>
+class Map{
+    public:
+    std::vector<Ellement> v;
+    Map(std::vector<Ellement> vec):v(vec){}
+    operator std::vector<Ellement>(){
+        return v;
+    }
+    Ellement Get(std::string n){
+        return GetByName(v, n);
+    }
+    void Set(std::string n, Ellement e){
+        for (auto& i:v){
+            if (i.name==n) i=e;
+        }
+        throw std::runtime_error("[SetByName]:Couldnt find key "+n);
+    }
+};
+
 struct Ellement{
     std::string name;
     std::vector<uint8_t> data;
@@ -88,7 +107,7 @@ struct Ellement{
             i++;
         }
     }
-    Map GetMap(){
+    Map<Ellement> GetMap(){
         std::vector<Ellement> res;
         size_t offset=0;
         while (offset<data.size()){
@@ -152,24 +171,6 @@ Ellement GetByName(std::vector<Ellement> v, std::string n){
     }
     throw std::runtime_error("[GetByName]:Couldnt find key "+n);
 }
-
-class Map{
-    public:
-    std::vector<Ellement> v;
-    Map(std::vector<Ellement> vec):v(vec){}
-    operator std::vector<Ellement>(){
-        return v;
-    }
-    Ellement Get(std::string n){
-        return GetByName(v, n);
-    }
-    void Set(std::string n, Ellement e){
-        for (auto& i:v){
-            if (i.name==n) i=e;
-        }
-        throw std::runtime_error("[SetByName]:Couldnt find key "+n);
-    }
-};
 
 /**
  * @brief Just a database. Look at methods brief if you want to know more.
@@ -290,7 +291,7 @@ class DataBase{
         ell.WriteMap(vec);
         attrs[key]=ell.data;
     }
-    Map ReadMapEx(const std::string& key){
+    Map<Ellement> ReadMapEx(const std::string& key){
         Ellement e;
         e.data=attrs[key];
         return e.GetMap();
