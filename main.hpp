@@ -6,7 +6,7 @@
 #ifdef DEBUG
 #define LOG(x) std::cout<<x<<std::endl
 #else
-#define LOG
+#define LOG(x)
 #endif
 
 template <typename Ellement>
@@ -17,12 +17,18 @@ class Map{
     operator std::vector<Ellement>(){
         return v;
     }
+    bool Has(std::string n){
+        for (auto i:v){
+            if (i.name==n) return true;
+        }
+        return false;
+    }
     Ellement Get(std::string n){
         return GetByName(v, n);
     }
     void Set(std::string n, Ellement e){
         for (auto& i:v){
-            if (i.name==n) {
+            if (i.name==n){ 
                 i=e;
                 return;
             }
