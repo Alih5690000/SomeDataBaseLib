@@ -22,7 +22,10 @@ class Map{
     }
     void Set(std::string n, Ellement e){
         for (auto& i:v){
-            if (i.name==n) i=e;
+            if (i.name==n) {
+                i=e;
+                return;
+            }
         }
         throw std::runtime_error("[SetByName]:Couldnt find key "+n);
     }
